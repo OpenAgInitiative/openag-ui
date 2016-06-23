@@ -46,7 +46,13 @@ const AddDataPointByID = (id, dataPoint) =>
 
 // Model init and update functions
 
-export const init = () => Indexed.init(Config.active_environment);
+export const init = () => {
+  // We hard-code the active environment for now.
+  const activeID = Config.active_environment;
+  const [active, activeFx] = Environment.init(activeID);
+  const model = Indexed.create([active], activeID);
+  return [model, activeFx.map(ByID(activeID))];
+}
 
 const updateIndexed = cursor({
   get: model => model,
@@ -56,12 +62,16 @@ const updateIndexed = cursor({
 });
 
 const readRow = row => row.value;
+// @FIXME must check that the value returned from http call is JSON and has
+// this structure before mapping.
 const readRecord = record => record.rows.map(readRow);
 
 const restore = (model, record) =>
   // Dispatch restore per id
   batch(update, model, readRecord(record).map(AddDataPoint));
 
+// @TODO is there a way we can accomplish this without first sending
+// an AddDataPoint action?
 const addDataPoint = (model, action) =>
   // If an environment exists, send datapoint to it.
   model.entries[action.value.environment] != null ?
@@ -73,7 +83,7 @@ const addDataPoint = (model, action) =>
   ]);
 
 const createEnvironment = (model, id) => {
-  const [environment, environmentFx] = Environment.init();
+  const [environment, environmentFx] = Environment.init(id);
   const next = Indexed.add(model, id, environment);
   return [
     next,
@@ -82,12 +92,11 @@ const createEnvironment = (model, id) => {
 }
 
 const environmentByID = (model, id, action) =>
-  // @TODO create environment if it doesn't exist already.
   Indexed.updateWithID(Environment.update, ByID(id), model, id, action);
 
 export const update = (model, action) =>
   action.type === 'Indexed' ?
-  updateIndexed(model, action) :
+  updateIndexed(model, action.source) :
   action.type === 'EnvironmentByID' ?
   environmentByID(model, action.id, action.source) :
   action.type === 'AddDataPoint' ?

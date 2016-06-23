@@ -16,7 +16,7 @@ export const Putted = result => ({
 });
 
 export const DoPut = (db, doc) =>
-  Effects.task(new Task((succeed, fail) => {
+  Effects.perform(new Task((succeed, fail) => {
     const alwaysDoc = constant(doc);
     db
       .put(doc)
@@ -45,7 +45,7 @@ const readDocs = database => database.rows.map(readDocFromRow);
 
 // Request in-memory restore from DB
 const DoRestore = db =>
-  Effects.task(new Task((succeed, fail) => {
+  Effects.perform(new Task((succeed, fail) => {
     db
       .allDocs({include_docs: true})
       .then(
@@ -72,7 +72,7 @@ export const Pushed = result => ({
 });
 
 const DoPush = (db, replica) =>
-  Effects.task(new Task((succeed, fail) => {
+  Effects.perform(new Task((succeed, fail) => {
     // Pouch will throw an error from xhr if there is no internet connection.
     // @TODO find out why Pouch isn't catching these 404s within the promise.
     try {
@@ -102,7 +102,7 @@ export const Pulled = result => ({
 });
 
 const DoPull = (db, replica) =>
-  Effects.task(new Task((succeed, fail) => {
+  Effects.perform(new Task((succeed, fail) => {
     db
       .replicate.from(replica)
       .then(
@@ -126,7 +126,7 @@ export const Synced = result => ({
 });
 
 export const DoSync = (db, replica) =>
-  Effects.task(new Task((succeed, fail) => {
+  Effects.perform(new Task((succeed, fail) => {
     try {
       db
         .sync(replica)

@@ -29,7 +29,7 @@ export const Miss = {
 
 // Send an action as an effect after a delay.
 export const schedule = (action, time) =>
-  Effects.task(Task.sleep(time)).map(constant(action));
+  Effects.perform(Task.sleep(time)).map(constant(action));
 
 export const calcDelay = (delay, misses) =>
   Math.min(delay + (delay * misses), MAX_DELAY);

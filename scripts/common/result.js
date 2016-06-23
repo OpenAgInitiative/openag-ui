@@ -29,3 +29,10 @@ export const error = /*::<error>*/
     , error
     }
   );
+
+// Given an ok and error update function,
+// create an update function for results that will unbox the value.
+export const updater = (ok, error) => (model, result) =>
+  result.isOk ?
+  ok(model, result.value) :
+  error(model, result.error);

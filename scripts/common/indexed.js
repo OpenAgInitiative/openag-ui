@@ -23,7 +23,7 @@ export const indexWith = (array, mapKey, mapValue) => {
 // Create a "getter" function that will get a particular key for an object.
 export const getter = key => object => object[key];
 
-export const getID = getter('_id');
+export const getID = getter('id');
 
 export const indexByID = array => indexWith(array, getID, identity);
 export const orderByID = array => array.map(getID);

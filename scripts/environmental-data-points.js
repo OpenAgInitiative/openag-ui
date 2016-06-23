@@ -5,6 +5,7 @@ import {merge, tagged, tag, batch} from './common/prelude';
 import * as ClassName from './common/classname';
 import * as Template from './common/stache';
 import {cursor} from './common/cursor';
+import * as Result from './common/result';
 import * as Request from './common/request';
 import * as Indexed from './common/indexed';
 import * as Unknown from './common/unknown';
@@ -38,6 +39,7 @@ const PollAction = action =>
 const PongPoll = PollAction(Poll.Pong);
 const MissPoll = PollAction(Poll.Miss);
 
+const Got = Request.Got;
 const GetLatest = Request.Get(ORIGIN_LATEST);
 
 // Init and update
@@ -52,9 +54,7 @@ export const init = () => {
       poll,
     },
     Effects.batch([
-      environmentsFx.map(EnvironmentsAction),
-      pollFx.map(PollAction),
-      Effects.receive(GetLatest)
+      environmentsFx.map(EnvironmentsAction)
     ])
   ];
 };
@@ -90,14 +90,13 @@ const readRecipeStartData = ({value, timestamp}) => ({
   startTime: timestamp
 });
 
-const gotOk = (model, record) =>
-  batch(update, model, [
+const got = Result.updater(
+  (model, record) => batch(update, model, [
     RestoreEnvironments(record),
     PongPoll
-  ]);
-
-const gotError = (model, error) =>
-  update(model, MissPoll);
+  ]),
+  (model, error) => update(model, MissPoll)
+);
 
 // Is the problem that I'm not mapping the returned effect?
 export const update = (model, action) =>
@@ -106,13 +105,9 @@ export const update = (model, action) =>
   action.type === 'Poll' ?
   updatePoll(model, action.source) :
   action.type === 'Get' ?
-  Request.get(model, action.url) :
+  [model, Request.get(action.url).map(Got)] :
   action.type === 'Got' ?
-  (
-    action.result.isOk ?
-    gotOk(model, action.result.value) :
-    gotError(model, action.result.error)
-  ) :
+  got(model, action.source) :
   Unknown.update(model, action);
 
 export const view = (model, address) =>
