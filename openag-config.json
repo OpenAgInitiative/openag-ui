@@ -37,7 +37,7 @@
       "unit": " Lux",
       "color": "#ffc500",
       "min": 0.0001,
-      "max": 100000
+      "max": 10000
     },
     {
       "variable": "air_temperature",
