@@ -24,7 +24,7 @@ sudo apt-get install -y nodejs`
 ```
 $ cd openag_ui
 $ npm install
-$ npm run couchapp_deploy --app_db_url="http://localhost:5984/app"
+$ npm run couchapp_deploy -- --app_db_url="http://localhost:5984/app"
 ```
 ### Access the UI
 Open your browser to `http://${IP_OF_FOOD_COMPUTER}:5984/app/_design/app/_rewrite`.
@@ -85,7 +85,7 @@ Deploying CouchApp
 
 When doing development, you can deploy the result as a "CouchApp" -- a set of attachments stored in a CouchDB design document. This is how we host the UI on the Food Computer.
 
-    npm run couchapp_deploy --app_db_url="http://localhost:5984/app"
+    npm run couchapp_deploy -- --app_db_url="http://localhost:5984/app"
 
 The `app_db_url` parameter is optional, and will default to `http://raspberrypi:5984/app`.
 The UI should be available at `http://${IP_OF_FOOD_COMPUTER}:5984/app/_design/app/_rewrite`
